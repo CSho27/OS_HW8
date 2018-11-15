@@ -14,6 +14,7 @@
 #include <stdbool.h>
 
 #define BUFLEN 1024
+#define MINI_BUFLEN 32
 
 void* open_shm(char *name){
 	const int SIZE = 4096;
@@ -38,19 +39,26 @@ int main(){
 	char* buffer = (char*) open_shm("buffer");
 	sem_t* rw_mutex = (sem_t*) open_shm("mutex_rw");
 	int* version = (int*) open_shm("version");
+	sem_t* mutex = (sem_t*) open_shm("mutex");
+	int* read_count = (int*) open_shm("read_count");
 
 	do{
 		printf("Enter the message you would like to write to the shared string or type -q to quit:\n");
-		char read_buf[BUFLEN];
-		fgets(read_buf, BUFLEN, stdin);
+		char read_buf[MINI_BUFLEN];
+		fgets(read_buf, MINI_BUFLEN, stdin);
 		if(read_buf[0] == '-'){
 			if(read_buf[1] == 'q')
 				done = true;
 		}
-		read_buf[BUFLEN-1] = '\0';
+		read_buf[MINI_BUFLEN-1] = '\0';
+
+		sem_wait(mutex);
+		if(*read_count > 0)
+			printf("read_count = %d\n", *read_count);
+		sem_post(mutex);
 
 		sem_wait(rw_mutex);
-		bzero(buffer, BUFLEN);
+		bzero(buffer, MINI_BUFLEN);
 		sprintf(buffer, "%s", read_buf);
 		version++;
 		sem_post(rw_mutex);

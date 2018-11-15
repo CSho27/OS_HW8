@@ -17,15 +17,15 @@
 
 void* open_shm(char *name){
 	const int SIZE = 4096;
-	int shm_fd = shm_open(name, O_RDONLY, 0666);
+	int shm_fd = shm_open(name, O_RDWR, 0666);
     if(shm_fd ==-1){
         printf("shared memory failed \n");
         exit(-1);
     }
 	
-	void* ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+	void* ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
     if (ptr == MAP_FAILED) {
-        printf("Map failed\n");
+        printf("Map failed\n"); 
         exit(-1);
     }
 	return ptr;
@@ -47,16 +47,18 @@ int main(){
 				done = true;
 		}
 		else{
-
 			read_buf[BUFLEN-1] = '\0';
+
 			sem_wait(mutex);
 			read_count++;
+			printf("read_count = %d\n", *read_count);
 			if(*read_count == 1)
 				sem_wait(rw_mutex);
 			sem_post(mutex);
 
 			printf("Reader: %s\n", buffer);
 			fflush(stdout);
+			sleep(10);
 
 			sem_wait(mutex);
 			read_count--;

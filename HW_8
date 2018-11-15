@@ -7,3 +7,99 @@ Reader #1: version 1: "string"
 Reader #2: version 2: "string"
 
 2.
+OUTPUT:
+Server:
+chris@chris-VirtualBox:~/Documents/OS/OS_HW8$ ./memory_server
+Press ENTER to quit and unlink shared memory
+
+Unlinking shared memory
+
+Writer:
+chris@chris-VirtualBox:~/Documents/OS/OS_HW8$ ./prob2_writer 
+Enter the message you would like to write to the shared string or type -q to quit:
+pale
+Enter the message you would like to write to the shared string or type -q to quit:
+ale
+Enter the message you would like to write to the shared string or type -q to quit:
+new
+Enter the message you would like to write to the shared string or type -q to quit:
+-q
+
+Reader:
+Press enter to read or type -q to quit:
+
+read_count = 0
+Reader: ale
+
+Press enter to read or type -q to quit:
+
+read_count = 0
+Reader: ale
+
+Press enter to read or type -q to quit:
+-q
+
+Not the best example but hey whatever.
+
+
+PART D:
+
+Server initializes
+RC MUT RW_MUT
+0  1   1		Initializing
+
+1st reader starts
+RC MUT RW_MUT
+0  0   1		mutex decrements to wait to update read_count
+1  0   1      	read_count goes to one during reading
+1  0   0		because rc is 1, rw_mut goes to 0
+1  1   0		reader 1 has updated read_count so is done with mut
+
+2nd reader starts
+RC MUT RW_MUT
+1  0   0		mutex decrements to wait to update read_count
+2  0   0      	read_count increments to 2 now for second reader
+2  1   0		reader 2 has updated read_count so is done with mut
+
+1st Writer tries to start, is denied
+
+3rd reader starts
+RC MUT RW_MUT
+2  0   0		mutex decrements to wait to update read_count
+3  0   0      	read_count increments to 3 now for second reader
+3  1   0		reader 3 has updated read_count so is done with mut
+
+2nd Writer tries to start, is denied
+
+1st reader finishes
+RC MUT RW_MUT
+0  0   0		mutex decrements to wait to update read_count
+2  0   0      	read_count decrements
+2  1   0		reader 1 has updated read_count so is done with mut
+
+2nd reader finishes
+RC MUT RW_MUT
+0  0   0		mutex decrements to wait to update read_count
+1  0   0      	read_count decrements
+1  1   0		reader 2 has updated read_count so is done with mut
+
+3rd reader finishes
+RC MUT RW_MUT
+0  0   0		mutex decrements to wait to update read_count
+0  0   0      	read_count decrements
+0  0   1		readers back to 0 so rw_mut increments again
+0  1   1		reader 3 has updated read_count so is done with mut
+
+1st Writer gets to go
+RC MUT RW_MUT
+0  1   0		writer starts writing so rw_mut decrements to wait
+0  1   1  		writer finishes and increments
+
+2nd Writer gets to go
+RC MUT RW_MUT
+0  1   0		writer starts writing so rw_mut decrements to wait
+0  1   1  		writer finishes and increments
+
+Any writers after this will follow same pattern until there are more readers
+
+3.
