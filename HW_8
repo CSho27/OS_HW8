@@ -1,0 +1,9 @@
+Christopher Shorter
+HW 8 Report
+
+1. Output:
+chris@chris-VirtualBox:~/Documents/OS/OS_HW8$ ./prob1 
+Reader #1: version 1: "string"
+Reader #2: version 2: "string"
+
+2.
