@@ -103,3 +103,152 @@ RC MUT RW_MUT
 Any writers after this will follow same pattern until there are more readers
 
 3.
+
+OUTPUT:
+
+Server:
+chris@chris-VirtualBox:~/Documents/OS/OS_HW8$ ./memory_server3
+Press ENTER to quit and unlink shared memory
+
+Unlinking shared memory
+
+Writer:
+chris@chris-VirtualBox:~/Documents/OS/OS_HW8$ ./prob3_writer 
+Enter the message you would like to write to the shared string or type -q to quit:
+new message
+Enter the message you would like to write to the shared string or type -q to quit:
+-q
+
+Reader:
+Press enter to read or type -q to quit:
+
+read_count = 0
+Reader: initial string
+Press enter to read or type -q to quit:
+
+read_count = 0
+Reader: new message
+
+Press enter to read or type -q to quit:
+-q
+
+
+PART D:
+in order the columns below represent the values for read_count, write_count, read_try (semaphore), mutex_write (semaphore),
+mutex_read (semaphore), read_write_mutex (also a semaphore, labelled as resource in my code).
+
+1st reader starts
+RC WC RT W_MUT R_MUT RW_MUT
+0  0  1  1     1     1		variables initialized
+0  0  0  1     1     1		read_try decrements to signify that reader is starting
+0  0  0  1     0     1		mutex_read decrements in order to adjust the read count
+1  0  0  1     0     1		read count is incremented for this reader
+1  0  0  1     0     0		decrements rw_mut to make sure the resource isnt written to
+1  0  0  1     1     0		increments because done adjusting read_count
+1  0  1  1     1     0		this read_try is over, so it can read value
+
+2nd reader starts
+RC WC RT W_MUT R_MUT RW_MUT
+1  0  0  1     1     0		read_try decrements to signify that reader is starting
+1  0  0  1     0     0		mutex_read decrements in order to adjust the read count
+2  0  0  1     0     0		read count is incremented for this reader
+2  0  0  1     0     0		decrements rw_mut to make sure the resource isnt written to
+2  0  0  1     1     0		increments because done adjusting read_count
+2  0  1  1     1     0		this read_try is over, so it can read value
+
+1st writer starts, but is still is denied because readers still reading
+
+3rd reader starts
+RC WC RT W_MUT R_MUT RW_MUT
+2  0  0  1     1     0		read_try decrements to signify that reader is starting
+2  0  0  1     0     0		mutex_read decrements in order to adjust the read count
+3  0  0  1     0     0		read count is incremented for this reader
+3  0  0  1     0     0		decrements rw_mut to make sure the resource isnt written to
+3  0  0  1     1     0		increments because done adjusting read_count
+3  0  1  1     1     0		this read_try is over, so it can read value
+
+2nd writer starts, but is still is deined because readers still reading
+
+1st reader finishes
+RC WC RT W_MUT R_MUT RW_MUT
+3  0  1  1     0     0		mutex_read decrements to change read_count value
+2  0  1  1     0     0		read count decrements by one
+2  0  1  1     1     0		mutex_read goes back to 1 beacase read_count has been adjusted
+
+2nd reader finishes
+RC WC RT W_MUT R_MUT RW_MUT
+2  0  1  1     0     0		mutex_read decrements to change read_count value
+1  0  1  1     0     0		read count decrements by one
+1  0  1  1     1     0		mutex_read goes back to 1 beacase read_count has been adjusted
+
+3rd reader finishes
+RC WC RT W_MUT R_MUT RW_MUT
+1  0  1  1     0     0		mutex_read decrements to change read_count value
+0  0  1  1     0     0		read count decrements by one
+0  0  1  1     1     1		since all readers are done, resource can be unlocked
+0  0  1  1     1     1		mutex_read goes back to 1 beacase read_count has been adjusted
+
+Any writer after this moment
+RC WC RT W_MUT R_MUT RW_MUT
+1  0  1  0     1     1		mutex_write decrements to change write_count value
+1  1  1  0     1     1  	write_count increments by one as writer starts
+1  1  0  0     1     1		Read_try decrements to make sure no readers try to read
+1  1  0  1     1     1		mutex_write posts, becuase we are done adjusting write_count
+1  1  0  1     1     0		resource locks as it actually writes the value
+1  1  0  1     1     1		resource unlocks right after
+1  1  0  0     1     1		mutex_write locks so write_count can be changed
+1  0  0  0     1     1		write_count actually decrements
+1  0  1  0     1     1		read_try posts so readers can read again
+1  0  1  1     1     1		we are done adjusting write_count so mutex_write posts
+
+This does allow writers to do some of their actions concurrently without starving.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
